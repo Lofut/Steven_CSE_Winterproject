@@ -1,0 +1,453 @@
+import turtle as t
+import random
+import math
+
+screen = t.Screen()
+screen.setup(1000, 1000)
+screen.title("Christmas Interactive Scene")
+screen.bgcolor("#07152e")
+screen.tracer(0)
+
+rocket_pen = t.Turtle()
+tree_pen = t.Turtle()
+snow_pen = t.Turtle()
+bg_pen = t.Turtle()
+star_pen = t.Turtle()
+
+for p in [rocket_pen, tree_pen, snow_pen, bg_pen, star_pen]:
+    p.hideturtle()
+    p.speed(0)
+
+
+def polygon(p, points, color):
+    p.penup()
+    p.goto(points[0])
+    p.color(color)
+    p.begin_fill()
+    p.pendown()
+
+    for point in points[1:]:
+        p.goto(point)
+
+    p.goto(points[0])
+    p.end_fill()
+    p.penup()
+
+
+def draw_background():
+    bg_pen.penup()
+    bg_pen.goto(350, 360)
+    bg_pen.color("#fff1bd")
+    bg_pen.dot(100)
+
+    bg_pen.goto(375, 380)
+    bg_pen.color("#07152e")
+    bg_pen.dot(85)
+
+    for _ in range(65):
+        x = random.randint(-480, 480)
+        y = random.randint(100, 470)
+
+        bg_pen.goto(x, y)
+        bg_pen.color(random.choice([
+            "white", "#dce8ff", "#ffe9a8"
+        ]))
+        bg_pen.dot(random.randint(2, 5))
+
+    polygon(
+        bg_pen,
+        [
+            (-500, -230),
+            (500, -230),
+            (500, -500),
+            (-500, -500)
+        ],
+        "#777777"
+    )
+
+
+rocket_x = -330
+rocket_y = -100
+rocket_busy = False
+
+
+def draw_rocket():
+    rocket_pen.clear()
+
+    polygon(
+        rocket_pen,
+        [
+            (rocket_x - 50, rocket_y - 150),
+            (rocket_x + 50, rocket_y - 150),
+            (rocket_x + 50, rocket_y + 100),
+            (rocket_x - 50, rocket_y + 100)
+        ],
+        "#eeeeee"
+    )
+
+    polygon(
+        rocket_pen,
+        [
+            (rocket_x - 50, rocket_y + 100),
+            (rocket_x, rocket_y + 150),
+            (rocket_x + 50, rocket_y + 100)
+        ],
+        "#d83232"
+    )
+
+    polygon(
+        rocket_pen,
+        [
+            (rocket_x + 50, rocket_y - 150),
+            (rocket_x + 100, rocket_y - 150),
+            (rocket_x + 50, rocket_y - 100)
+        ],
+        "#d83232"
+    )
+
+    polygon(
+        rocket_pen,
+        [
+            (rocket_x - 50, rocket_y - 150),
+            (rocket_x - 100, rocket_y - 150),
+            (rocket_x - 50, rocket_y - 100)
+        ],
+        "#d83232"
+    )
+
+    rocket_pen.penup()
+    rocket_pen.goto(rocket_x, rocket_y - 10)
+    rocket_pen.color("#222222")
+    rocket_pen.dot(66)
+
+    rocket_pen.goto(rocket_x, rocket_y - 10)
+    rocket_pen.color("#55cfff")
+    rocket_pen.dot(56)
+
+    rocket_pen.goto(rocket_x - 10, rocket_y + 2)
+    rocket_pen.color("#d9f6ff")
+    rocket_pen.dot(12)
+
+
+def rocket_click_animation():
+    global rocket_x, rocket_y, rocket_busy
+
+    if rocket_busy:
+        return
+
+    rocket_busy = True
+
+    def shake(frame):
+        global rocket_x
+
+        if frame < 20:
+            rocket_x = -330 + random.randint(-5, 5)
+            draw_rocket()
+            screen.update()
+            screen.ontimer(lambda: shake(frame + 1), 40)
+        else:
+            fly_up(0)
+
+    def fly_up(frame):
+        global rocket_y
+
+        if frame < 35:
+            rocket_y += 20
+            draw_rocket()
+            screen.update()
+            screen.ontimer(lambda: fly_up(frame + 1), 30)
+        else:
+            screen.ontimer(return_rocket, 3000)
+
+    def return_rocket():
+        global rocket_x, rocket_y
+
+        rocket_x = -330
+        rocket_y = 800
+        draw_rocket()
+        screen.update()
+
+        def descend():
+            global rocket_y, rocket_busy
+
+            if rocket_y > -100:
+                rocket_y -= 20
+                draw_rocket()
+                screen.update()
+                screen.ontimer(descend, 30)
+            else:
+                rocket_y = -100
+                draw_rocket()
+                screen.update()
+                rocket_busy = False
+
+        descend()
+
+    shake(0)
+
+
+tree_colors = [
+    "#168b45",
+    "#248f55",
+    "#176b39",
+    "#277d42",
+    "#0d994b",
+    "#3b9b50",
+    "#125c32"
+]
+
+tree_color_index = 0
+
+
+def draw_tree():
+    tree_pen.clear()
+
+    color = tree_colors[tree_color_index]
+
+    polygon(
+        tree_pen,
+        [
+            (-25, -230),
+            (25, -230),
+            (25, -150),
+            (-25, -150)
+        ],
+        "#80512c"
+    )
+
+    polygon(
+        tree_pen,
+        [
+            (0, 170),
+            (-65, 55),
+            (-35, 55),
+            (-95, -45),
+            (-45, -45),
+            (-120, -150),
+            (120, -150),
+            (45, -45),
+            (95, -45),
+            (35, 55),
+            (65, 55)
+        ],
+        color
+    )
+
+    for x, y in [
+        (0, 100),
+        (-35, 20),
+        (35, -35),
+        (-60, -95),
+        (65, -105),
+        (0, -75)
+    ]:
+        tree_pen.penup()
+        tree_pen.goto(x, y)
+        tree_pen.color("#ffd34e")
+        tree_pen.dot(13)
+
+    tree_pen.goto(0, 180)
+    tree_pen.color("#ffdf55")
+    tree_pen.dot(25)
+
+
+def change_tree():
+    global tree_color_index
+
+    tree_color_index = (tree_color_index + 1) % len(tree_colors)
+    draw_tree()
+    screen.update()
+
+
+snowman_x = 330
+snowman_y = -150
+snowman_busy = False
+
+
+def draw_snowman():
+    snow_pen.clear()
+
+    snow_pen.penup()
+    snow_pen.goto(snowman_x, snowman_y - 65)
+    snow_pen.color("white")
+    snow_pen.dot(110)
+
+    snow_pen.goto(snowman_x, snowman_y + 5)
+    snow_pen.dot(80)
+
+    snow_pen.goto(snowman_x, snowman_y + 65)
+    snow_pen.dot(60)
+
+    snow_pen.goto(snowman_x - 12, snowman_y + 75)
+    snow_pen.color("black")
+    snow_pen.dot(7)
+
+    snow_pen.goto(snowman_x + 12, snowman_y + 75)
+    snow_pen.dot(7)
+
+    polygon(
+        snow_pen,
+        [
+            (snowman_x, snowman_y + 65),
+            (snowman_x + 28, snowman_y + 58),
+            (snowman_x, snowman_y + 53)
+        ],
+        "#ff8c32"
+    )
+
+    for y in [-5, -25, -45]:
+        snow_pen.goto(snowman_x, snowman_y + y)
+        snow_pen.color("black")
+        snow_pen.dot(8)
+
+    snow_pen.color("#70452b")
+    snow_pen.pensize(5)
+
+    snow_pen.penup()
+    snow_pen.goto(snowman_x - 30, snowman_y + 5)
+    snow_pen.pendown()
+    snow_pen.goto(snowman_x - 75, snowman_y + 35)
+
+    snow_pen.penup()
+    snow_pen.goto(snowman_x + 30, snowman_y + 5)
+    snow_pen.pendown()
+    snow_pen.goto(snowman_x + 75, snowman_y + 35)
+
+    snow_pen.penup()
+
+
+def snowman_jump():
+    global snowman_y, snowman_busy
+
+    if snowman_busy:
+        return
+
+    snowman_busy = True
+
+    def jump(frame, jump_number):
+        global snowman_y, snowman_busy
+
+        if frame < 10:
+            snowman_y += 8
+        elif frame < 20:
+            snowman_y -= 8
+        else:
+            if jump_number < 3:
+                screen.ontimer(
+                    lambda: jump(0, jump_number + 1),
+                    100
+                )
+                return
+            else:
+                snowman_y = -150
+                draw_snowman()
+                screen.update()
+                snowman_busy = False
+                return
+
+        draw_snowman()
+        screen.update()
+
+        screen.ontimer(
+            lambda: jump(frame + 1, jump_number),
+            35
+        )
+
+    jump(0, 1)
+
+
+star_x = -500
+star_y = 350
+star_busy = False
+
+
+def draw_shooting_star(x, y, scale=1):
+    star_pen.clear()
+    star_pen.penup()
+
+    points = []
+
+    for i in range(10):
+        angle = math.radians(90 + i * 36)
+
+        if i % 2 == 0:
+            radius = 22 * scale
+        else:
+            radius = 10 * scale
+
+        px = x + radius * math.cos(angle)
+        py = y + radius * math.sin(angle)
+
+        points.append((px, py))
+
+    polygon(star_pen, points, "#fff1a8")
+
+    star_pen.goto(x, y)
+    star_pen.color("#ffffff")
+    star_pen.dot(8 * scale)
+
+
+def shooting_star_glow():
+    global star_busy
+
+    if star_busy:
+        return
+
+    star_busy = True
+
+    scales = [1, 1.3, 1.7, 2.2, 2.5, 2.2, 1.7, 1.3, 1]
+
+    def glow(frame):
+        global star_busy
+
+        if frame < len(scales):
+            draw_shooting_star(star_x, star_y, scales[frame])
+            screen.update()
+            screen.ontimer(lambda: glow(frame + 1), 70)
+        else:
+            star_busy = False
+
+    glow(0)
+
+
+def move_shooting_star():
+    global star_x
+
+    star_x += 4
+
+    if star_x > 550:
+        star_x = -550
+
+    if not star_busy:
+        draw_shooting_star(star_x, star_y)
+
+    screen.update()
+    screen.ontimer(move_shooting_star, 30)
+
+
+def click_scene(x, y):
+
+    if abs(x - star_x) < 35 and abs(y - star_y) < 35:
+        shooting_star_glow()
+
+    elif -450 <= x <= -210 and -270 <= y <= 120:
+        rocket_click_animation()
+
+    elif -150 <= x <= 150 and -230 <= y <= 200:
+        change_tree()
+
+    elif 230 <= x <= 430 and -230 <= y <= 200:
+        snowman_jump()
+
+
+draw_background()
+draw_rocket()
+draw_tree()
+draw_snowman()
+draw_shooting_star(star_x, star_y)
+
+screen.onclick(click_scene)
+
+move_shooting_star()
+
+screen.mainloop()
